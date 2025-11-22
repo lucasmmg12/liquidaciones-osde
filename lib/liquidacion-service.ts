@@ -336,6 +336,11 @@ export async function processLiquidacion(
     // Verificar si aplica plus del 20% por horario especial
     const tienePlusHorario = aplicaPlusHorario(row.fecha, row.hora);
     
+    // Log para depuración
+    if (tienePlusHorario) {
+      console.log(`🔥 PLUS APLICADO: Fecha=${row.fecha}, Hora=${row.hora}, Factor antes=${factor}, Factor después=${factor + 0.20}`);
+    }
+    
     // Sumar el 20% al factor si corresponde (no multiplicar el importe)
     if (tienePlusHorario) {
       factor = factor + 0.20;

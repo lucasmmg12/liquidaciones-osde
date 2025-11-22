@@ -135,13 +135,32 @@ function getFeriadosDefecto(): Feriado[] {
 }
 
 /**
+ * Convierte fecha de dd/mm/yyyy a YYYY-MM-DD
+ */
+function convertirFecha(fecha: string): string {
+  // Si ya está en formato YYYY-MM-DD, retornar tal cual
+  if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
+    return fecha.split('T')[0]; // Remover hora si existe
+  }
+  
+  // Si está en formato dd/mm/yyyy, convertir
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(fecha)) {
+    const [dia, mes, anio] = fecha.split('/');
+    return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  }
+  
+  // Si no coincide ningún formato, devolver tal cual
+  return fecha;
+}
+
+/**
  * Determina si se debe aplicar el plus del 20% por horario especial
  * 
  * Reglas:
  * - Feriados: TODO EL DÍA (00:00 a 23:59) - Se toma por el horario de comienzo
  * - Fines de semana: Sábado desde 13:00 hasta Domingo 23:59
  * 
- * @param fecha Fecha en formato YYYY-MM-DD
+ * @param fecha Fecha en formato dd/mm/yyyy o YYYY-MM-DD
  * @param hora Hora en formato HH:MM o HH:MM:SS
  * @returns true si aplica el plus del 20%
  */
@@ -149,13 +168,15 @@ export function aplicaPlusHorario(fecha: string, hora?: string): boolean {
   if (!fecha) return false;
   
   try {
-    const fechaObj = new Date(fecha + 'T00:00:00');
+    // Convertir fecha a formato YYYY-MM-DD
+    const fechaISO = convertirFecha(fecha);
+    const fechaObj = new Date(fechaISO + 'T00:00:00');
     const diaSemana = fechaObj.getDay(); // 0=Domingo, 6=Sábado
     
     // FERIADO: TODO EL DÍA (00:00 - 23:59)
     // Los feriados tienen prioridad y aplican sin importar la hora
-    if (esFeriado(fecha)) {
-      console.log(`✓ Aplicando plus por FERIADO: ${fecha}`);
+    if (esFeriado(fechaISO)) {
+      console.log(`✓ Aplicando plus por FERIADO: ${fecha} (${fechaISO})`);
       return true;
     }
     
@@ -172,19 +193,19 @@ export function aplicaPlusHorario(fecha: string, hora?: string): boolean {
     
     // DOMINGO: Todo el día (0:00 - 23:59)
     if (diaSemana === 0) {
-      console.log(`✓ Aplicando plus por DOMINGO: ${fecha} ${hora}`);
+      console.log(`✓ Aplicando plus por DOMINGO: ${fecha} ${hora} (${fechaISO})`);
       return true;
     }
     
     // SÁBADO: Desde 13:00 (13:00 - 23:59)
     if (diaSemana === 6 && horaDecimal >= 13) {
-      console.log(`✓ Aplicando plus por SÁBADO >= 13:00: ${fecha} ${hora}`);
+      console.log(`✓ Aplicando plus por SÁBADO >= 13:00: ${fecha} ${hora} (${fechaISO})`);
       return true;
     }
     
     return false;
   } catch (error) {
-    console.error('Error al verificar plus horario:', error);
+    console.error('Error al verificar plus horario:', error, 'fecha:', fecha);
     return false;
   }
 }
