@@ -138,9 +138,8 @@ function getFeriadosDefecto(): Feriado[] {
  * Determina si se debe aplicar el plus del 20% por horario especial
  * 
  * Reglas:
- * - Sábados de 13:00 a 23:59
- * - Domingos todo el día (00:00 a 23:59)
- * - Feriados de 13:00 a 23:59
+ * - Feriados: TODO EL DÍA (00:00 a 23:59) - Se toma por el horario de comienzo
+ * - Fines de semana: Sábado desde 13:00 hasta Domingo 23:59
  * 
  * @param fecha Fecha en formato YYYY-MM-DD
  * @param hora Hora en formato HH:MM o HH:MM:SS
@@ -153,7 +152,14 @@ export function aplicaPlusHorario(fecha: string, hora?: string): boolean {
     const fechaObj = new Date(fecha + 'T00:00:00');
     const diaSemana = fechaObj.getDay(); // 0=Domingo, 6=Sábado
     
-    // Si no tiene hora, no aplicar plus (ser conservador)
+    // FERIADO: TODO EL DÍA (00:00 - 23:59)
+    // Los feriados tienen prioridad y aplican sin importar la hora
+    if (esFeriado(fecha)) {
+      console.log(`✓ Aplicando plus por FERIADO: ${fecha}`);
+      return true;
+    }
+    
+    // Si no tiene hora, no aplicar plus para fines de semana
     if (!hora) return false;
     
     // Extraer hora en formato de 24hs
@@ -166,16 +172,13 @@ export function aplicaPlusHorario(fecha: string, hora?: string): boolean {
     
     // DOMINGO: Todo el día (0:00 - 23:59)
     if (diaSemana === 0) {
+      console.log(`✓ Aplicando plus por DOMINGO: ${fecha} ${hora}`);
       return true;
     }
     
-    // SÁBADO: Desde 13:00
+    // SÁBADO: Desde 13:00 (13:00 - 23:59)
     if (diaSemana === 6 && horaDecimal >= 13) {
-      return true;
-    }
-    
-    // FERIADO: Desde 13:00
-    if (esFeriado(fecha) && horaDecimal >= 13) {
+      console.log(`✓ Aplicando plus por SÁBADO >= 13:00: ${fecha} ${hora}`);
       return true;
     }
     
