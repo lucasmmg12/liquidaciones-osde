@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Liquidaciones - Módulos',
-  description: 'Sistema de liquidaciones para instrumentadores y consultas',
+  title: 'OSDE Liquidaciones | Grow Labs',
+  description: 'Sistema profesional de liquidaciones médicas y gestión de instrumentadores - Powered by Grow Labs',
 };
 
 export default function RootLayout({
@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="es" className="dark">
+      <body className={`${inter.className} bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-screen`}>
         {children}
         <Toaster />
       </body>

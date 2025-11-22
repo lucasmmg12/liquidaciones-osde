@@ -3,116 +3,156 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Calculator, Users, Settings, FileSpreadsheet } from 'lucide-react';
+import { Calculator, Users, Settings, FileSpreadsheet, Sparkles } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export default function HomePage() {
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-3">
-            Sistema de Liquidaciones OSDE
-          </h1>
-          <p className="text-lg text-slate-600">
-            Gestión de liquidaciones y nomencladores para instrumentadores
-          </p>
-        </div>
-
-        {/* Main sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Liquidaciones */}
-          <Link href="/instrumentadores">
-            <Card className="p-8 hover:shadow-lg transition-all cursor-pointer group h-full">
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                  <Calculator className="h-12 w-12 text-blue-600" />
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <div className="container mx-auto px-4 py-16">
+          {/* Logo y título */}
+          <div className="text-center mb-16">
+            <div className="flex justify-center mb-6 animate-float">
+              <div className="relative">
+                <div className="absolute inset-0 bg-green-400 blur-2xl opacity-50 rounded-full"></div>
+                <div className="h-24 w-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center relative z-10 shadow-2xl">
+                  <span className="text-white font-bold text-4xl">O</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                    Liquidaciones
-                  </h2>
-                  <p className="text-slate-600">
-                    Procesar liquidaciones mensuales de procedimientos quirúrgicos
-                  </p>
-                </div>
-                <Button className="mt-4 w-full" size="lg">
-                  Ir a Liquidaciones
-                </Button>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Gestión de Instrumentadores */}
-          <Link href="/admin/instrumentadores">
-            <Card className="p-8 hover:shadow-lg transition-all cursor-pointer group h-full">
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="p-4 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
-                  <Users className="h-12 w-12 text-green-600" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                    Instrumentadores
-                  </h2>
-                  <p className="text-slate-600">
-                    Gestionar base de datos de instrumentadores del equipo
-                  </p>
-                </div>
-                <Button className="mt-4 w-full" size="lg" variant="outline">
-                  Gestionar Instrumentadores
-                </Button>
-              </div>
-            </Card>
-          </Link>
-        </div>
-
-        {/* Admin section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Nomenclador */}
-          <Link href="/admin/nomenclador">
-            <Card className="p-6 hover:shadow-md transition-all cursor-pointer group">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                  <Settings className="h-8 w-8 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
-                    Nomenclador
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    Configurar códigos y valores
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Placeholder for future modules */}
-          <Card className="p-6 bg-slate-50 border-dashed">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-slate-200 rounded-lg">
-                <FileSpreadsheet className="h-8 w-8 text-slate-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-500">
-                  Próximamente
-                </h3>
-                <p className="text-sm text-slate-400">
-                  Más funcionalidades en camino
-                </p>
               </div>
             </div>
-          </Card>
-        </div>
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                Sistema de Liquidaciones OSDE
+              </span>
+            </h1>
+            <p className="text-gray-300 text-xl flex items-center justify-center gap-2">
+              <Sparkles className="h-5 w-5 text-green-400" />
+              Gestión profesional de liquidaciones y nomencladores
+            </p>
+          </div>
 
-        {/* Footer info */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-slate-500">
-            Sistema de gestión de liquidaciones médicas • OSDE
-          </p>
+          {/* Main sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
+            {/* Liquidaciones */}
+            <Link href="/instrumentadores" className="group">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 rounded-2xl opacity-30 blur-lg animate-border-glow"></div>
+                <Card className="relative glass-effect border-blue-500/30 glow-blue p-8 hover:shadow-2xl transition-all duration-300 group-hover:scale-[1.02] h-full">
+                  <div className="flex flex-col items-center text-center gap-6">
+                    <div className="p-6 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                      <Calculator className="h-16 w-16 text-blue-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-white mb-3">
+                        Liquidaciones
+                      </h2>
+                      <p className="text-gray-300 text-lg leading-relaxed">
+                        Procesar liquidaciones mensuales de procedimientos quirúrgicos con precisión y eficiencia
+                      </p>
+                    </div>
+                    <Button 
+                      className="mt-4 w-full py-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold text-lg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/50 hover:scale-105 relative overflow-hidden group/btn border-0"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
+                      <span className="relative flex items-center justify-center gap-2">
+                        <Sparkles className="h-5 w-5" />
+                        Ir a Liquidaciones
+                      </span>
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </Link>
+
+            {/* Gestión de Instrumentadores */}
+            <Link href="/admin/instrumentadores" className="group">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 rounded-2xl opacity-30 blur-lg animate-border-glow"></div>
+                <Card className="relative glass-effect border-green-500/30 glow-green p-8 hover:shadow-2xl transition-all duration-300 group-hover:scale-[1.02] h-full">
+                  <div className="flex flex-col items-center text-center gap-6">
+                    <div className="p-6 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                      <Users className="h-16 w-16 text-green-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-white mb-3">
+                        Instrumentadores
+                      </h2>
+                      <p className="text-gray-300 text-lg leading-relaxed">
+                        Gestionar base de datos completa del equipo de instrumentadores médicos
+                      </p>
+                    </div>
+                    <Button 
+                      className="mt-4 w-full py-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg transition-all duration-300 hover:shadow-xl hover:shadow-green-500/50 hover:scale-105 relative overflow-hidden group/btn border-0"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
+                      <span className="relative flex items-center justify-center gap-2">
+                        <Sparkles className="h-5 w-5" />
+                        Gestionar Equipo
+                      </span>
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </Link>
+          </div>
+
+          {/* Admin section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* Nomenclador */}
+            <Link href="/admin/nomenclador" className="group">
+              <div className="relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl opacity-20 blur group-hover:opacity-40 transition-opacity duration-300"></div>
+                <Card className="relative glass-effect border-purple-500/30 p-6 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 group-hover:scale-[1.02]">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <Settings className="h-10 w-10 text-purple-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-1">
+                        Nomenclador
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        Configurar códigos y valores del sistema
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </Link>
+
+            {/* Placeholder for future modules */}
+            <div className="relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-500 to-slate-500 rounded-xl opacity-10 blur"></div>
+              <Card className="relative glass-effect border-gray-500/20 p-6 opacity-60">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-gray-500/10 to-slate-500/10 rounded-xl">
+                    <FileSpreadsheet className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-400 mb-1">
+                      Próximamente
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                      Más funcionalidades en desarrollo
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Decoración inferior */}
+          <div className="mt-16 flex justify-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-3 h-3 rounded-full bg-green-300 animate-pulse" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
