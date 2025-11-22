@@ -8,7 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload, Search, Plus, AlertCircle, Download } from 'lucide-react';
+import { ArrowLeft, Upload, Search, Plus, AlertCircle, Download, FileText, Sparkles } from 'lucide-react';
+import Footer from '@/components/Footer';
 import { Procedimiento, ValorNomenclador } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -495,27 +496,60 @@ export default function NomencladorPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/instrumentadores">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-3xl font-bold text-slate-900">Nomenclador</h1>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Header con estética Grow Labs */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link href="/instrumentadores">
+                <Button 
+                  variant="ghost" 
+                  className="glass-effect-dark border-green-500/30 hover:bg-green-500/20 hover:border-green-400 text-white"
+                >
+                  <ArrowLeft className="h-5 w-5 text-green-400" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                  Nomenclador
+                </h1>
+                <p className="text-gray-300 mt-1 text-lg flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-green-400" />
+                  Gestión de códigos, procedimientos y valores
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <Card className="p-6">
+        <Card className="glass-effect border-green-500/30 p-6">
           <Tabs defaultValue="procedimientos" className="w-full">
-            <div className="border-b px-6 pt-6">
-              <TabsList className="w-full justify-start">
-                <TabsTrigger value="procedimientos">Procedimientos (Código → Complejidad)</TabsTrigger>
-                <TabsTrigger value="valores">Valores (Complejidad + Mes/Año → Valor)</TabsTrigger>
-                <TabsTrigger value="liquidaciones">Liquidaciones (Numeración)</TabsTrigger>
-                <TabsTrigger value="feriados">Feriados (Plus 20%)</TabsTrigger>
+            <div className="border-b border-green-500/20 px-6 pt-6">
+              <TabsList className="w-full justify-start bg-gray-800/50">
+                <TabsTrigger 
+                  value="procedimientos"
+                  className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400"
+                >
+                  Procedimientos (Código → Complejidad)
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="valores"
+                  className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400"
+                >
+                  Valores (Complejidad + Mes/Año → Valor)
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="liquidaciones"
+                  className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400"
+                >
+                  Liquidaciones (Numeración)
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="feriados"
+                  className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400"
+                >
+                  Feriados (Plus 20%)
+                </TabsTrigger>
               </TabsList>
             </div>
 
