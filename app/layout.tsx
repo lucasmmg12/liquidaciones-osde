@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Liquidaciones Médicas | Grow Labs',
   description: 'Sistema profesional de liquidaciones médicas para todas las obras sociales y gestión de instrumentadores - Powered by Grow Labs',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
