@@ -18,11 +18,14 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-green-400 blur-lg opacity-50 rounded-full"></div>
-                <div className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center relative z-10">
-                  <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 9h-4v4h-4v-4H6v-4h4V8h4v4h4v4z"/>
-                  </svg>
-                </div>
+                <img
+                  src="/logogrow.png"
+                  alt="Grow Labs Logo"
+                  className="h-12 w-12 object-contain relative z-10"
+                  style={{
+                    filter: 'drop-shadow(0 0 15px rgba(34, 197, 94, 0.5))'
+                  }}
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">

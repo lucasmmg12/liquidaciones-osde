@@ -22,6 +22,7 @@ import { exportPDFPorInstrumentador, exportResumenToPDF } from '@/lib/pdf-export
 import { FaltantesManager } from '@/components/faltantes-manager';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import Footer from '@/components/Footer';
 
 export default function InstrumentadoresPage() {
   const [sheetFile, setSheetFile] = useState<File | null>(null);
@@ -305,29 +306,41 @@ export default function InstrumentadoresPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Header con estética Grow Labs */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link href="/">
+                <Button 
+                  variant="ghost" 
+                  className="glass-effect-dark border-green-500/30 hover:bg-green-500/20 hover:border-green-400 text-white"
+                >
+                  <ArrowLeft className="h-5 w-5 text-green-400" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                  Liquidaciones
+                </h1>
+                <p className="text-gray-400 text-sm mt-1">Procesamiento de procedimientos quirúrgicos</p>
+              </div>
+            </div>
+            <Link href="/admin/nomenclador">
+              <Button 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-purple-500/50 border-0"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Nomenclador
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-slate-900">Instrumentadores</h1>
           </div>
-          <Link href="/admin/nomenclador">
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Nomenclador
-            </Button>
-          </Link>
-        </div>
 
         <div className="space-y-6">
           <FileDrop onFileSelect={handleFileSelect} selectedFile={sheetFile} />
 
-          <Card className="p-4">
+          <Card className="glass-effect border-green-500/30 glow-green p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="mes">Mes</Label>
@@ -472,15 +485,17 @@ export default function InstrumentadoresPage() {
           )}
         </div>
 
-        <FaltantesManager
-          open={showFaltantesManager}
-          onClose={() => setShowFaltantesManager(false)}
-          faltantes={faltantes}
-          mes={mes}
-          anio={anio}
-          onResolve={handleReloadAfterResolve}
-        />
+          <FaltantesManager
+            open={showFaltantesManager}
+            onClose={() => setShowFaltantesManager(false)}
+            faltantes={faltantes}
+            mes={mes}
+            anio={anio}
+            onResolve={handleReloadAfterResolve}
+          />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

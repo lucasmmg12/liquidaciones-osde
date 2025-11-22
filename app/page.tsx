@@ -17,11 +17,14 @@ export default function HomePage() {
             <div className="flex justify-center mb-6 animate-float">
               <div className="relative">
                 <div className="absolute inset-0 bg-green-400 blur-2xl opacity-50 rounded-full"></div>
-                <div className="h-24 w-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center relative z-10 shadow-2xl">
-                  <svg className="w-14 h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 9h-4v4h-4v-4H6v-4h4V8h4v4h4v4z"/>
-                  </svg>
-                </div>
+                <img
+                  src="/logogrow.png"
+                  alt="Grow Labs"
+                  className="h-24 w-24 object-contain relative z-10 drop-shadow-2xl"
+                  style={{
+                    filter: 'drop-shadow(0 0 30px rgba(34, 197, 94, 0.6))'
+                  }}
+                />
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
