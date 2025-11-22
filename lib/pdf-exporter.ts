@@ -112,8 +112,8 @@ export async function exportResumenToPDF(resumen: ResumenRow[], filename?: strin
 }
 
 /**
- * Exporta PDF individual por instrumentador - FORMATO OFICIAL OSDE
- * Replica el formato exacto del PDF de liquidación de OSDE
+ * Exporta PDF individual por instrumentador - FORMATO GROW LABS
+ * Formato profesional con branding de Grow Labs
  */
 export async function exportPDFPorInstrumentador(
   detalle: DetalleRow[], 
@@ -145,69 +145,102 @@ export async function exportPDFPorInstrumentador(
     const detalleInstrumentador = detalle.filter(d => d.instrumentador === instrumentador);
     
     const doc = new jsPDF();
-    let yPos = 15;
     
-    // === LOGO Y ENCABEZADO IZQUIERDO ===
-    doc.setFontSize(14);
+    // === LOGO GROW LABS (IZQUIERDA) ===
+    try {
+      // Intentar cargar el logo
+      const logoImg = new Image();
+      logoImg.src = '/logogrow.png';
+      await new Promise<void>((resolve) => {
+        logoImg.onload = () => {
+          doc.addImage(logoImg, 'PNG', 14, 8, 20, 20);
+          resolve();
+        };
+        logoImg.onerror = () => {
+          console.warn('No se pudo cargar el logo');
+          resolve();
+        };
+        // Timeout de 500ms
+        setTimeout(() => resolve(), 500);
+      });
+    } catch (error) {
+      console.warn('Error cargando logo:', error);
+    }
+    
+    // Texto junto al logo
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setTextColor(0, 102, 204); // Azul institucional
-    doc.text('OSDE', 14, yPos);
-    yPos += 5;
+    doc.setTextColor(16, 185, 129); // Verde Grow Labs
+    doc.text('Grow Labs', 37, 15);
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.setTextColor(0, 0, 0);
-    doc.text('Desde 1974', 14, yPos);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Sistema de Liquidaciones Médicas', 37, 20);
     
-    // === CUADRO DE INFORMACIÓN (DERECHA) ===
-    const boxStartX = 110;
+    // === CUADRO DE INFORMACIÓN (CENTRADO-DERECHA) ===
+    const boxStartX = 100; // Más a la izquierda para centrar mejor
     const boxStartY = 10;
-    const boxWidth = 86;
+    const boxWidth = 96;
     const rowHeight = 8;
     
-    // Dibujar cuadro
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
+    // Dibujar cuadro con borde verde
+    doc.setDrawColor(16, 185, 129); // Verde Grow Labs
+    doc.setLineWidth(0.8);
     doc.rect(boxStartX, boxStartY, boxWidth, rowHeight * 4);
     
     // Líneas horizontales internas
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(200, 200, 200); // Gris claro para líneas internas
     doc.line(boxStartX, boxStartY + rowHeight, boxStartX + boxWidth, boxStartY + rowHeight);
     doc.line(boxStartX, boxStartY + rowHeight * 2, boxStartX + boxWidth, boxStartY + rowHeight * 2);
     doc.line(boxStartX, boxStartY + rowHeight * 3, boxStartX + boxWidth, boxStartY + rowHeight * 3);
     
+    // Línea vertical para separar etiquetas de valores
+    const labelWidth = 46;
+    doc.line(boxStartX + labelWidth, boxStartY, boxStartX + labelWidth, boxStartY + rowHeight * 4);
+    
     // Contenido del cuadro
     doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
     
     // Fila 1: Profesional
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(16, 185, 129); // Verde para etiquetas
     doc.text('Profesional:', boxStartX + 2, boxStartY + 5);
     doc.setFont(undefined, 'normal');
-    doc.text(instrumentador, boxStartX + 28, boxStartY + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(instrumentador.toUpperCase(), boxStartX + labelWidth + 3, boxStartY + 5);
     
     // Fila 2: Número de matrícula
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(16, 185, 129);
     doc.text('Número de matrícula:', boxStartX + 2, boxStartY + rowHeight + 5);
     doc.setFont(undefined, 'normal');
-    doc.text('--', boxStartX + 42, boxStartY + rowHeight + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.text('--', boxStartX + labelWidth + 3, boxStartY + rowHeight + 5);
     
     // Fila 3: Período de liquidación
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(16, 185, 129);
     doc.text('Período de liquidación:', boxStartX + 2, boxStartY + rowHeight * 2 + 5);
     doc.setFont(undefined, 'normal');
-    doc.text(`${nombreMesCapitalizado} ${anio}`, boxStartX + 44, boxStartY + rowHeight * 2 + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${nombreMesCapitalizado} ${anio}`, boxStartX + labelWidth + 3, boxStartY + rowHeight * 2 + 5);
     
     // Fila 4: Liquidación
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(16, 185, 129);
     doc.text('Liquidación:', boxStartX + 2, boxStartY + rowHeight * 3 + 5);
     doc.setFont(undefined, 'normal');
-    doc.text(numeroFinal, boxStartX + 26, boxStartY + rowHeight * 3 + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(numeroFinal, boxStartX + labelWidth + 3, boxStartY + rowHeight * 3 + 5);
     
     // === TABLA DE DETALLE ===
-    yPos = boxStartY + rowHeight * 4 + 10;
+    const yPos = boxStartY + rowHeight * 4 + 10;
     
     const tableData = detalleInstrumentador.map(d => [
       formatDate(d.fecha),
       d.paciente.toUpperCase(),
-      `${d.codigo} - ${d.procedimiento}`,
+      `${d.codigo} - ${d.procedimiento.substring(0, 40)}`, // Limitar longitud
       '', // Observación vacía por defecto
       formatARS(d.importe),
       d.cirujano.toUpperCase()
@@ -225,28 +258,33 @@ export async function exportPDFPorInstrumentador(
       body: tableData,
       startY: yPos,
       styles: { 
-        fontSize: 8,
-        cellPadding: 2,
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1
+        fontSize: 7.5,
+        cellPadding: 2.5,
+        lineColor: [200, 200, 200], // Gris claro
+        lineWidth: 0.1,
+        textColor: [40, 40, 40]
       },
       headStyles: { 
-        fillColor: [220, 230, 241],
-        textColor: [0, 0, 0],
+        fillColor: [16, 185, 129], // Verde Grow Labs
+        textColor: [255, 255, 255], // Texto blanco
         fontStyle: 'bold',
         fontSize: 8,
-        halign: 'center'
+        halign: 'center',
+        cellPadding: 3
       },
       columnStyles: {
-        0: { cellWidth: 22, halign: 'center' },   // Fecha visita
-        1: { cellWidth: 45 },                      // Paciente
-        2: { cellWidth: 50 },                      // Procedimiento
-        3: { cellWidth: 25, halign: 'center' },   // Observación
-        4: { cellWidth: 25, halign: 'right' },    // Valor
-        5: { cellWidth: 30 }                       // Cirujano
+        0: { cellWidth: 24, halign: 'center' },    // Fecha visita
+        1: { cellWidth: 42 },                       // Paciente
+        2: { cellWidth: 60 },                       // Procedimiento (más ancho)
+        3: { cellWidth: 20, halign: 'center' },    // Observación (más pequeño)
+        4: { cellWidth: 22, halign: 'right' },     // Valor
+        5: { cellWidth: 29 }                        // Cirujano (ajustado)
+      },
+      alternateRowStyles: {
+        fillColor: [249, 250, 251] // Gris muy claro para filas alternadas
       },
       theme: 'grid',
-      tableLineColor: [0, 0, 0],
+      tableLineColor: [200, 200, 200],
       tableLineWidth: 0.1
     });
     
