@@ -1,4 +1,13 @@
-# 🎨 Estética Grow Labs - Aplicada
+# 🎨 Estética Grow Labs - Sistema Multi-Obra Social
+
+## 🏥 Sistema Para Todas las Obras Sociales
+
+Este sistema está diseñado para gestionar liquidaciones de **todas las obras sociales**:
+- OSDE
+- Swiss Medical  
+- PAMI
+- Sancor Salud
+- Y más...
 
 ## ✅ Cambios Implementados
 
@@ -28,7 +37,8 @@
 ### 4. **Layout Global** (`app/layout.tsx`)
 - ✅ Clase `dark` aplicada al HTML
 - ✅ Fondo oscuro en el body
-- ✅ Metadatos actualizados: "OSDE Liquidaciones | Grow Labs"
+- ✅ Metadatos actualizados: "Liquidaciones Médicas | Grow Labs"
+- ✅ Sistema multi-obra social
 
 ## 🎨 Paleta de Colores
 

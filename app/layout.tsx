@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'OSDE Liquidaciones | Grow Labs',
-  description: 'Sistema profesional de liquidaciones médicas y gestión de instrumentadores - Powered by Grow Labs',
+  title: 'Liquidaciones Médicas | Grow Labs',
+  description: 'Sistema profesional de liquidaciones médicas para todas las obras sociales y gestión de instrumentadores - Powered by Grow Labs',
 };
 
 export default function RootLayout({

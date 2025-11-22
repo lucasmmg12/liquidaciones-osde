@@ -19,21 +19,23 @@ export default function Footer() {
               <div className="relative">
                 <div className="absolute inset-0 bg-green-400 blur-lg opacity-50 rounded-full"></div>
                 <div className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center relative z-10">
-                  <span className="text-white font-bold text-xl">O</span>
+                  <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 9h-4v4h-4v-4H6v-4h4V8h4v4h4v4z"/>
+                  </svg>
                 </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-                  OSDE Liquidaciones
+                  Liquidaciones Médicas
                 </h3>
                 <p className="text-green-300 text-sm italic flex items-center gap-2">
                   <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
-                  Sistema de gestión profesional
+                  Todas las obras sociales
                 </p>
               </div>
             </div>
             <p className="text-gray-300 text-sm mb-4">
-              Sistema de gestión de liquidaciones médicas y nomencladores para instrumentadores. Desarrollado con tecnología de vanguardia.
+              Sistema integral de gestión de liquidaciones médicas y nomencladores para todas las obras sociales. Plataforma unificada desarrollada con tecnología de vanguardia.
             </p>
             <div className="flex gap-3">
               <a
@@ -102,10 +104,10 @@ export default function Footer() {
           >
             <h4 className="text-lg font-bold text-green-300 mb-2 flex items-center gap-2">
               <Sparkles size={18} className="text-green-400" />
-              Plataforma Exclusiva
+              Plataforma Profesional
             </h4>
             <p className="text-gray-300 text-sm">
-              Esta plataforma es única y exclusivamente para <span className="font-bold text-green-300">OSDE</span> y los servicios contratados. Sistema desarrollado por <span className="font-bold text-green-300">Grow Labs</span>.
+              Sistema multi-obra social que permite gestionar liquidaciones de <span className="font-bold text-green-300">OSDE, Swiss Medical, PAMI, Sancor Salud</span> y más. Solución completa desarrollada por <span className="font-bold text-green-300">Grow Labs</span>.
             </p>
           </div>
         </div>

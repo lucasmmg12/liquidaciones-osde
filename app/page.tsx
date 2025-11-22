@@ -18,18 +18,20 @@ export default function HomePage() {
               <div className="relative">
                 <div className="absolute inset-0 bg-green-400 blur-2xl opacity-50 rounded-full"></div>
                 <div className="h-24 w-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center relative z-10 shadow-2xl">
-                  <span className="text-white font-bold text-4xl">O</span>
+                  <svg className="w-14 h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 9h-4v4h-4v-4H6v-4h4V8h4v4h4v4z"/>
+                  </svg>
                 </div>
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               <span className="bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-                Sistema de Liquidaciones OSDE
+                Sistema de Liquidaciones Médicas
               </span>
             </h1>
             <p className="text-gray-300 text-xl flex items-center justify-center gap-2">
               <Sparkles className="h-5 w-5 text-green-400" />
-              Gestión profesional de liquidaciones y nomencladores
+              Todas las Obras Sociales en una sola plataforma
             </p>
           </div>
 
