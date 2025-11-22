@@ -1,5 +1,6 @@
-import { Instagram, Globe, MessageCircle, Linkedin, Sparkles } from 'lucide-react';
+import { Instagram, Globe, MessageCircle, Linkedin, Sparkles, FileText } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -109,9 +110,21 @@ export default function Footer() {
               <Sparkles size={18} className="text-green-400" />
               Plataforma Profesional
             </h4>
-            <p className="text-gray-300 text-sm">
+            <p className="text-gray-300 text-sm mb-4">
               Sistema multi-obra social que permite gestionar liquidaciones de <span className="font-bold text-green-300">OSDE, Swiss Medical, PAMI, Sancor Salud</span> y más. Solución completa desarrollada por <span className="font-bold text-green-300">Grow Labs</span>.
             </p>
+            
+            {/* Link a Actualizaciones */}
+            <Link 
+              href="/actualizaciones"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 hover:border-green-400/60 text-green-300 hover:text-green-200 transition-all duration-300 text-sm font-medium group"
+            >
+              <FileText size={16} className="group-hover:scale-110 transition-transform" />
+              Ver Actualizaciones del Sistema
+              <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-green-500/30 text-xs">
+                v1.5.0
+              </span>
+            </Link>
           </div>
         </div>
 
