@@ -115,9 +115,6 @@ export interface ProcessedRow {
 export interface Instrumentador {
   id: string;
   nombre: string;
-  apellido: string;
-  email: string | null;
-  telefono: string | null;
   matricula_provincial: string | null;
   cuit: string | null;
   especialidad: string | null;

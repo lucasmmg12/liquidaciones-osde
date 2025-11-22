@@ -3,60 +3,39 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Search } from 'lucide-react';
-import { InstrumentadoresTable } from '@/components/instrumentadores-table';
+import { ArrowLeft, Upload, Plus, Users, Search } from 'lucide-react';
 import { Instrumentador } from '@/lib/types';
 import {
   getAllInstrumentadores,
   createInstrumentador,
   updateInstrumentador,
-  deleteInstrumentador,
+  deleteInstrumentador
 } from '@/lib/instrumentadores-service';
+import { InstrumentadoresTable } from '@/components/instrumentadores-table';
+import { ImportInstrumentadoresModal } from '@/components/import-instrumentadores-modal';
+import { AddInstrumentadorForm } from '@/components/add-instrumentador-form';
 import { useToast } from '@/hooks/use-toast';
 
-export default function InstrumentadoresAdminPage() {
+export default function GestionInstrumentadoresPage() {
   const [instrumentadores, setInstrumentadores] = useState<Instrumentador[]>([]);
   const [filteredInstrumentadores, setFilteredInstrumentadores] = useState<Instrumentador[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showNewDialog, setShowNewDialog] = useState(false);
-  const [newInstrumentador, setNewInstrumentador] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    activo: true,
-  });
-
+  const [incluirInactivos, setIncluirInactivos] = useState(false);
+  
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadInstrumentadores();
-  }, []);
-
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredInstrumentadores(instrumentadores);
-    } else {
-      const term = searchTerm.toLowerCase();
-      const filtered = instrumentadores.filter(
-        (i) =>
-          i.nombre.toLowerCase().includes(term) ||
-          i.apellido.toLowerCase().includes(term) ||
-          (i.email && i.email.toLowerCase().includes(term))
-      );
-      setFilteredInstrumentadores(filtered);
-    }
-  }, [searchTerm, instrumentadores]);
-
+  // Cargar instrumentadores
   const loadInstrumentadores = async () => {
     setLoading(true);
     try {
-      const data = await getAllInstrumentadores();
+      const data = await getAllInstrumentadores(incluirInactivos);
       setInstrumentadores(data);
       setFilteredInstrumentadores(data);
     } catch (error) {
@@ -64,100 +43,107 @@ export default function InstrumentadoresAdminPage() {
       toast({
         title: 'Error',
         description: 'No se pudieron cargar los instrumentadores',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreate = async () => {
-    if (!newInstrumentador.nombre.trim() || !newInstrumentador.apellido.trim()) {
-      toast({
-        title: 'Error',
-        description: 'El nombre y apellido son obligatorios',
-        variant: 'destructive',
-      });
-      return;
+  // Cargar al montar el componente
+  useEffect(() => {
+    loadInstrumentadores();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incluirInactivos]);
+
+  // Filtrar instrumentadores cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredInstrumentadores(instrumentadores);
+    } else {
+      const filtered = instrumentadores.filter(inst =>
+        inst.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inst.matricula_provincial?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inst.cuit?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inst.especialidad?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredInstrumentadores(filtered);
     }
+  }, [searchTerm, instrumentadores]);
 
-    try {
-      await createInstrumentador({
-        nombre: newInstrumentador.nombre.trim(),
-        apellido: newInstrumentador.apellido.trim(),
-        email: newInstrumentador.email.trim() || null,
-        telefono: newInstrumentador.telefono.trim() || null,
-        matricula_provincial: null,
-        cuit: null,
-        especialidad: null,
-        grupo_personal: null,
-        perfil: null,
-        activo: newInstrumentador.activo,
-      });
-
-      toast({
-        title: 'Éxito',
-        description: 'Instrumentador creado correctamente',
-      });
-
-      setShowNewDialog(false);
-      setNewInstrumentador({
-        nombre: '',
-        apellido: '',
-        email: '',
-        telefono: '',
-        activo: true,
-      });
-      loadInstrumentadores();
-    } catch (error) {
-      console.error('Error creating instrumentador:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo crear el instrumentador',
-        variant: 'destructive',
-      });
-    }
-  };
-
+  // Manejar actualización de instrumentador
   const handleUpdate = async (instrumentador: Instrumentador) => {
     try {
       await updateInstrumentador(instrumentador.id, instrumentador);
       toast({
         title: 'Éxito',
-        description: 'Instrumentador actualizado correctamente',
+        description: 'Instrumentador actualizado correctamente'
       });
-      loadInstrumentadores();
+      await loadInstrumentadores();
     } catch (error) {
-      console.error('Error updating instrumentador:', error);
+      console.error('Error updating:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo actualizar el instrumentador',
-        variant: 'destructive',
+        description: 'No se pudo actualizar el instrumentador',
+        variant: 'destructive'
       });
+      throw error;
     }
   };
 
+  // Manejar eliminación de instrumentador
   const handleDelete = async (id: string) => {
     try {
       await deleteInstrumentador(id);
       toast({
         title: 'Éxito',
-        description: 'Instrumentador eliminado correctamente',
+        description: 'Instrumentador desactivado correctamente'
       });
-      loadInstrumentadores();
+      await loadInstrumentadores();
     } catch (error) {
-      console.error('Error deleting instrumentador:', error);
+      console.error('Error deleting:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo eliminar el instrumentador',
-        variant: 'destructive',
+        description: 'No se pudo desactivar el instrumentador',
+        variant: 'destructive'
       });
+      throw error;
     }
+  };
+
+  // Manejar creación de instrumentador
+  const handleCreate = async (data: Omit<Instrumentador, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      await createInstrumentador(data);
+      toast({
+        title: 'Éxito',
+        description: 'Instrumentador creado correctamente'
+      });
+      await loadInstrumentadores();
+    } catch (error) {
+      console.error('Error creating:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el instrumentador',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  // Manejar éxito de importación
+  const handleImportSuccess = async () => {
+    toast({
+      title: 'Importación exitosa',
+      description: 'Los instrumentadores se importaron correctamente'
+    });
+    await loadInstrumentadores();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link href="/">
@@ -165,104 +151,114 @@ export default function InstrumentadoresAdminPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-slate-900">Gestión de Instrumentadores</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">Gestión de Instrumentadores</h1>
+              <p className="text-slate-600 mt-1">
+                Base de datos de instrumentadores del equipo
+              </p>
+            </div>
           </div>
-          <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Instrumentador
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Agregar Nuevo Instrumentador</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="nombre">Nombre *</Label>
-                  <Input
-                    id="nombre"
-                    value={newInstrumentador.nombre}
-                    onChange={(e) =>
-                      setNewInstrumentador({ ...newInstrumentador, nombre: e.target.value })
-                    }
-                    placeholder="Ej: Juan"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="apellido">Apellido *</Label>
-                  <Input
-                    id="apellido"
-                    value={newInstrumentador.apellido}
-                    onChange={(e) =>
-                      setNewInstrumentador({ ...newInstrumentador, apellido: e.target.value })
-                    }
-                    placeholder="Ej: Pérez"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newInstrumentador.email}
-                    onChange={(e) =>
-                      setNewInstrumentador({ ...newInstrumentador, email: e.target.value })
-                    }
-                    placeholder="Ej: juan.perez@example.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="telefono">Teléfono</Label>
-                  <Input
-                    id="telefono"
-                    value={newInstrumentador.telefono}
-                    onChange={(e) =>
-                      setNewInstrumentador({ ...newInstrumentador, telefono: e.target.value })
-                    }
-                    placeholder="Ej: +54 9 11 1234-5678"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowNewDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleCreate}>Crear</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Instrumentadores ({filteredInstrumentadores.length})</span>
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-slate-500" />
+        {/* Stats */}
+        <Card className="p-6 mb-6">
+          <div className="flex items-center gap-3">
+            <Users className="h-8 w-8 text-blue-500" />
+            <div>
+              <p className="text-2xl font-bold text-slate-900">
+                {filteredInstrumentadores.length}
+              </p>
+              <p className="text-sm text-slate-600">
+                {searchTerm ? 'Resultados encontrados' : 'Instrumentadores registrados'}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Actions Bar */}
+        <Card className="p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex-1 w-full md:w-auto">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  type="text"
-                  placeholder="Buscar..."
+                  placeholder="Buscar por nombre, matrícula, CUIT o especialidad..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-64"
+                  className="pl-10"
                 />
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8 text-slate-600">Cargando instrumentadores...</div>
-            ) : (
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="incluir-inactivos"
+                  checked={incluirInactivos}
+                  onCheckedChange={setIncluirInactivos}
+                />
+                <Label htmlFor="incluir-inactivos" className="text-sm cursor-pointer">
+                  Incluir inactivos
+                </Label>
+              </div>
+              
+              <Button
+                variant="outline"
+                onClick={() => setShowImportModal(true)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar Excel
+              </Button>
+              
+              <Button onClick={() => setShowAddForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Table */}
+        <Card className="p-6">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+              <p className="mt-4 text-slate-600">Cargando instrumentadores...</p>
+            </div>
+          ) : (
+            <>
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Lista de Instrumentadores
+                </h2>
+                {searchTerm && (
+                  <p className="text-sm text-slate-600 mt-1">
+                    Mostrando {filteredInstrumentadores.length} de {instrumentadores.length} instrumentadores
+                  </p>
+                )}
+              </div>
               <InstrumentadoresTable
                 data={filteredInstrumentadores}
                 onUpdate={handleUpdate}
                 onDelete={handleDelete}
               />
-            )}
-          </CardContent>
+            </>
+          )}
         </Card>
+
+        {/* Import Modal */}
+        <ImportInstrumentadoresModal
+          open={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onSuccess={handleImportSuccess}
+        />
+
+        {/* Add Form */}
+        <AddInstrumentadorForm
+          open={showAddForm}
+          onClose={() => setShowAddForm(false)}
+          onSubmit={handleCreate}
+        />
       </div>
     </div>
   );

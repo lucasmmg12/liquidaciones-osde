@@ -201,9 +201,6 @@ function processInstrumentadorRow(
   
   return {
     nombre: nombre,
-    apellido: '',
-    email: null,
-    telefono: null,
     matricula_provincial: matricula || null,
     cuit: cuit || null,
     especialidad: especialidad || null,
