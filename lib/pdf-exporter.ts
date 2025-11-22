@@ -6,6 +6,7 @@
 import { DetalleRow, ResumenRow } from './types';
 import { formatARS, formatDate } from './formatters';
 import { getNumeroLiquidacion } from './liquidacion-config-service';
+import { getMatriculaByNombre } from './instrumentadores-service';
 
 // Tipos temporales para evitar errores de compilación
 // Reemplazar con imports reales cuando se instalen las dependencias
@@ -144,7 +145,21 @@ export async function exportPDFPorInstrumentador(
   for (const instrumentador of instrumentadores) {
     const detalleInstrumentador = detalle.filter(d => d.instrumentador === instrumentador);
     
-    const doc = new jsPDF();
+    // Obtener matrícula del instrumentador
+    const matricula = await getMatriculaByNombre(instrumentador);
+    
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Márgenes del documento
+    const marginLeft = 14;
+    const marginRight = 14;
+    const marginTop = 15;
+    const pageWidth = 210; // A4 width en mm
+    const usableWidth = pageWidth - marginLeft - marginRight;
     
     // === LOGO GROW LABS (IZQUIERDA) ===
     try {
@@ -153,7 +168,7 @@ export async function exportPDFPorInstrumentador(
       logoImg.src = '/logogrow.png';
       await new Promise<void>((resolve) => {
         logoImg.onload = () => {
-          doc.addImage(logoImg, 'PNG', 14, 8, 20, 20);
+          doc.addImage(logoImg, 'PNG', marginLeft, marginTop - 5, 20, 20);
           resolve();
         };
         logoImg.onerror = () => {
@@ -171,16 +186,16 @@ export async function exportPDFPorInstrumentador(
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     doc.setTextColor(16, 185, 129); // Verde Grow Labs
-    doc.text('Grow Labs', 37, 15);
+    doc.text('Grow Labs', marginLeft + 23, marginTop + 2);
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(100, 100, 100);
-    doc.text('Sistema de Liquidaciones Médicas', 37, 20);
+    doc.text('Sistema de Liquidaciones Médicas', marginLeft + 23, marginTop + 7);
     
-    // === CUADRO DE INFORMACIÓN (CENTRADO-DERECHA) ===
-    const boxStartX = 100; // Más a la izquierda para centrar mejor
-    const boxStartY = 10;
-    const boxWidth = 96;
+    // === CUADRO DE INFORMACIÓN (DERECHA, BIEN ALINEADO) ===
+    const boxWidth = 100; // Ancho fijo
+    const boxStartX = pageWidth - marginRight - boxWidth; // Alineado a la derecha con margen
+    const boxStartY = marginTop;
     const rowHeight = 8;
     
     // Dibujar cuadro con borde verde
@@ -216,7 +231,7 @@ export async function exportPDFPorInstrumentador(
     doc.text('Número de matrícula:', boxStartX + 2, boxStartY + rowHeight + 5);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(0, 0, 0);
-    doc.text('--', boxStartX + labelWidth + 3, boxStartY + rowHeight + 5);
+    doc.text(matricula || '--', boxStartX + labelWidth + 3, boxStartY + rowHeight + 5);
     
     // Fila 3: Período de liquidación
     doc.setFont(undefined, 'bold');
@@ -235,12 +250,12 @@ export async function exportPDFPorInstrumentador(
     doc.text(numeroFinal, boxStartX + labelWidth + 3, boxStartY + rowHeight * 3 + 5);
     
     // === TABLA DE DETALLE ===
-    const yPos = boxStartY + rowHeight * 4 + 10;
+    const tableStartY = boxStartY + rowHeight * 4 + 10;
     
     const tableData = detalleInstrumentador.map(d => [
       formatDate(d.fecha),
       d.paciente.toUpperCase(),
-      `${d.codigo} - ${d.procedimiento.substring(0, 40)}`, // Limitar longitud
+      `${d.codigo} - ${d.procedimiento.substring(0, 45)}`, // Limitar longitud
       '', // Observación vacía por defecto
       formatARS(d.importe),
       d.cirujano.toUpperCase()
@@ -256,13 +271,16 @@ export async function exportPDFPorInstrumentador(
         'Cirujano'
       ]],
       body: tableData,
-      startY: yPos,
+      startY: tableStartY,
+      margin: { left: marginLeft, right: marginRight },
       styles: { 
         fontSize: 7.5,
         cellPadding: 2.5,
         lineColor: [200, 200, 200], // Gris claro
         lineWidth: 0.1,
-        textColor: [40, 40, 40]
+        textColor: [40, 40, 40],
+        overflow: 'linebreak',
+        cellWidth: 'wrap'
       },
       headStyles: { 
         fillColor: [16, 185, 129], // Verde Grow Labs
@@ -270,22 +288,24 @@ export async function exportPDFPorInstrumentador(
         fontStyle: 'bold',
         fontSize: 8,
         halign: 'center',
-        cellPadding: 3
+        cellPadding: 3,
+        valign: 'middle'
       },
       columnStyles: {
-        0: { cellWidth: 24, halign: 'center' },    // Fecha visita
+        0: { cellWidth: 25, halign: 'center' },    // Fecha visita
         1: { cellWidth: 42 },                       // Paciente
-        2: { cellWidth: 60 },                       // Procedimiento (más ancho)
-        3: { cellWidth: 20, halign: 'center' },    // Observación (más pequeño)
-        4: { cellWidth: 22, halign: 'right' },     // Valor
-        5: { cellWidth: 29 }                        // Cirujano (ajustado)
+        2: { cellWidth: 62 },                       // Procedimiento
+        3: { cellWidth: 18, halign: 'center' },    // Observación
+        4: { cellWidth: 24, halign: 'right' },     // Valor
+        5: { cellWidth: 32 }                        // Cirujano (más ancho)
       },
       alternateRowStyles: {
         fillColor: [249, 250, 251] // Gris muy claro para filas alternadas
       },
       theme: 'grid',
       tableLineColor: [200, 200, 200],
-      tableLineWidth: 0.1
+      tableLineWidth: 0.1,
+      tableWidth: usableWidth
     });
     
     // === GUARDAR ARCHIVO ===

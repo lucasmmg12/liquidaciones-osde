@@ -186,3 +186,22 @@ export async function searchInstrumentadores(query: string): Promise<Instrumenta
   return data || [];
 }
 
+/**
+ * Obtener la matrícula de un instrumentador por nombre
+ */
+export async function getMatriculaByNombre(nombre: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('instrumentadores')
+    .select('matricula_provincial')
+    .ilike('nombre', nombre)
+    .eq('activo', true)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching matricula:', error);
+    return null;
+  }
+
+  return data?.matricula_provincial || null;
+}
+
