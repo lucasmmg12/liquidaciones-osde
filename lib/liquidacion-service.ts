@@ -330,19 +330,19 @@ export async function processLiquidacion(
       continue;
     }
     
-    // Calcular factor (primer procedimiento de la fila 100%, restantes 50%)
-    const factor = calculateFactor(row.orden_en_fila, row.instrumentador, row.fecha, detalle);
+    // Calcular factor base (primer procedimiento de la fila 100%, restantes 50%)
+    let factor = calculateFactor(row.orden_en_fila, row.instrumentador, row.fecha, detalle);
     
     // Verificar si aplica plus del 20% por horario especial
     const tienePlusHorario = aplicaPlusHorario(row.fecha, row.hora);
     
-    // Calcular importe base
-    let importeBase = valor * factor;
-    
-    // Aplicar plus del 20% si corresponde
+    // Sumar el 20% al factor si corresponde (no multiplicar el importe)
     if (tienePlusHorario) {
-      importeBase = importeBase * 1.20;
+      factor = factor + 0.20;
     }
+    
+    // Calcular importe con el factor final (que ya incluye el plus si corresponde)
+    const importeBase = valor * factor;
     
     // Crear fila de detalle (usar codigoFinal que puede ser el oficial si se encontró por descripción)
     detalle.push({

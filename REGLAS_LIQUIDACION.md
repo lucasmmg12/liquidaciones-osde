@@ -23,33 +23,35 @@ Importe Base = Valor del Nomenclador × Factor
 
 ### 2. Plus del 20% por Horario Especial
 
-El sistema aplica un **plus del 20%** sobre el importe base en los siguientes casos:
+El sistema **suma 20% al factor** de liquidación en los siguientes casos:
 
 #### 🎉 A. Días Feriados
 - **Horario**: TODO EL DÍA (00:00 hs - 23:59 hs)
 - **Criterio**: Se toma por el horario de **comienzo del procedimiento**
-- **Cálculo**: `Importe Final = Importe Base × 1.20`
+- **Cálculo**: `Factor Final = Factor Base + 0.20`
 
 **Ejemplo**:
 ```
 Fecha: 2025-01-01 (Año Nuevo - Feriado)
 Hora de comienzo: 10:00 hs
 Plus: SÍ (aplica todo el día)
+Factor: 1.0 + 0.20 = 1.20 (120%)
 
 Fecha: 2025-01-01 (Año Nuevo - Feriado)
 Hora de comienzo: 22:00 hs
 Plus: SÍ (aplica todo el día)
+Factor: 1.0 + 0.20 = 1.20 (120%)
 ```
 
 #### 📅 B. Fines de Semana
 
 **Sábados**:
 - **Horario**: Desde las 13:00 hs hasta las 23:59 hs
-- **Cálculo**: `Importe Final = Importe Base × 1.20`
+- **Cálculo**: `Factor Final = Factor Base + 0.20`
 
 **Domingos**:
 - **Horario**: TODO EL DÍA (00:00 hs - 23:59 hs)
-- **Cálculo**: `Importe Final = Importe Base × 1.20`
+- **Cálculo**: `Factor Final = Factor Base + 0.20`
 
 **Ejemplos**:
 ```
@@ -78,61 +80,73 @@ El sistema verifica en este orden:
 ### Ejemplo 1: Procedimiento Simple en Día Normal
 ```
 Valor Nomenclador: $10,000
-Factor: 1.0 (primer procedimiento)
+Factor Base: 1.0 (primer procedimiento)
 Día: Martes 10:00 hs
 Plus horario: NO
 
 Cálculo:
-Importe Base = $10,000 × 1.0 = $10,000
-Importe Final = $10,000
+Factor Final = 1.0 (sin plus)
+Importe Final = $10,000 × 1.0 = $10,000
 ```
 
-### Ejemplo 2: Procedimiento en Feriado
+### Ejemplo 2: Primer Procedimiento en Feriado
 ```
 Valor Nomenclador: $10,000
-Factor: 1.0 (primer procedimiento)
+Factor Base: 1.0 (primer procedimiento)
 Día: 01/01/2025 (Año Nuevo) - 10:00 hs
 Plus horario: SÍ (feriado todo el día)
 
 Cálculo:
-Importe Base = $10,000 × 1.0 = $10,000
+Factor Final = 1.0 + 0.20 = 1.20 (120%)
 Importe Final = $10,000 × 1.20 = $12,000
 ```
 
 ### Ejemplo 3: Segundo Procedimiento en Domingo
 ```
 Valor Nomenclador: $8,000
-Factor: 0.5 (segundo procedimiento)
+Factor Base: 0.5 (segundo procedimiento)
 Día: Domingo 15:00 hs
 Plus horario: SÍ (domingo todo el día)
 
 Cálculo:
-Importe Base = $8,000 × 0.5 = $4,000
-Importe Final = $4,000 × 1.20 = $4,800
+Factor Final = 0.5 + 0.20 = 0.70 (70%)
+Importe Final = $8,000 × 0.70 = $5,600
 ```
 
 ### Ejemplo 4: Procedimiento en Sábado Mañana
 ```
 Valor Nomenclador: $10,000
-Factor: 1.0 (primer procedimiento)
+Factor Base: 1.0 (primer procedimiento)
 Día: Sábado 10:00 hs
 Plus horario: NO (sábado antes de 13:00)
 
 Cálculo:
-Importe Base = $10,000 × 1.0 = $10,000
-Importe Final = $10,000
+Factor Final = 1.0 (sin plus)
+Importe Final = $10,000 × 1.0 = $10,000
 ```
 
-### Ejemplo 5: Procedimiento en Sábado Tarde
+### Ejemplo 5: Primer Procedimiento en Sábado Tarde
 ```
 Valor Nomenclador: $10,000
-Factor: 1.0 (primer procedimiento)
+Factor Base: 1.0 (primer procedimiento)
 Día: Sábado 15:00 hs
 Plus horario: SÍ (sábado >= 13:00)
 
 Cálculo:
-Importe Base = $10,000 × 1.0 = $10,000
+Factor Final = 1.0 + 0.20 = 1.20 (120%)
 Importe Final = $10,000 × 1.20 = $12,000
+```
+
+### Ejemplo 6: Segundo Procedimiento en Sábado Tarde
+```
+Valor Nomenclador: $8,000
+Factor Base: 0.5 (segundo procedimiento)
+Día: Sábado 16:00 hs
+Plus horario: SÍ (sábado >= 13:00)
+
+Cálculo:
+Factor Final = 0.5 + 0.20 = 0.70 (70%)
+Importe Final = $8,000 × 0.70 = $5,600
 ```
 
 ---
@@ -191,19 +205,19 @@ return false;
 ### Archivo: `lib/liquidacion-service.ts`
 
 ```typescript
-// Calcular factor (primer proc 100%, restantes 50%)
-const factor = calculateFactor(row.orden_en_fila, ...);
+// Calcular factor base (primer proc 100%, restantes 50%)
+let factor = calculateFactor(row.orden_en_fila, ...);
 
 // Verificar plus horario
 const tienePlusHorario = aplicaPlusHorario(row.fecha, row.hora);
 
-// Calcular importe
-let importeBase = valor * factor;
-
-// Aplicar plus del 20% si corresponde
+// SUMAR el 20% al factor si corresponde
 if (tienePlusHorario) {
-  importeBase = importeBase * 1.20;
+  factor = factor + 0.20; // 1.0 → 1.20 o 0.5 → 0.70
 }
+
+// Calcular importe con el factor final
+const importe = valor * factor;
 ```
 
 ---
