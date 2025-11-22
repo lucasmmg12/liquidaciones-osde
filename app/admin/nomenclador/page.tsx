@@ -555,44 +555,55 @@ export default function NomencladorPage() {
 
             <TabsContent value="procedimientos" className="p-6">
               <div className="mb-6 space-y-4">
-                <div className="flex gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <div className="flex flex-wrap gap-4">
+                  <div className="relative flex-1 min-w-[250px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       placeholder="Buscar por código o procedimiento..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 glass-effect-dark border-green-500/30 text-white placeholder-gray-400 focus:border-green-400"
                     />
                   </div>
-                  <Button onClick={handleExportarNomenclador} variant="outline">
+                  <Button 
+                    onClick={handleExportarNomenclador} 
+                    variant="outline"
+                    className="glass-effect-dark border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-400"
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Exportar CSV
                   </Button>
-                  <Button onClick={handleCreateProcedimiento} variant="outline">
+                  <Button 
+                    onClick={handleCreateProcedimiento} 
+                    variant="outline"
+                    className="glass-effect-dark border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:border-blue-400"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Procedimiento
                   </Button>
-                  <Button onClick={() => setShowImportModal(true)}>
+                  <Button 
+                    onClick={() => setShowImportModal(true)}
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/50 border-0"
+                  >
                     <Upload className="h-4 w-4 mr-2" />
                     Importar desde Excel
                   </Button>
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="bg-slate-100 px-4 py-2 rounded-md">
-                    <span className="text-slate-600">Total de procedimientos: </span>
-                    <span className="font-bold text-slate-900">{procedimientos.length}</span>
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <div className="glass-effect-dark border-green-500/30 px-4 py-2 rounded-md">
+                    <span className="text-gray-400">Total de procedimientos: </span>
+                    <span className="font-bold text-white">{procedimientos.length}</span>
                   </div>
                   {search && filteredProcedimientos.length !== procedimientos.length && (
-                    <div className="bg-blue-100 px-4 py-2 rounded-md">
-                      <span className="text-blue-600">Mostrando: </span>
-                      <span className="font-bold text-blue-900">{filteredProcedimientos.length}</span>
+                    <div className="glass-effect-dark border-blue-500/30 px-4 py-2 rounded-md">
+                      <span className="text-blue-400">Mostrando: </span>
+                      <span className="font-bold text-blue-300">{filteredProcedimientos.length}</span>
                     </div>
                   )}
-                  <div className="bg-green-100 px-4 py-2 rounded-md">
-                    <span className="text-green-600">Activos: </span>
-                    <span className="font-bold text-green-900">
+                  <div className="glass-effect-dark border-green-500/30 px-4 py-2 rounded-md glow-green">
+                    <span className="text-green-400">Activos: </span>
+                    <span className="font-bold text-green-300">
                       {procedimientos.filter(p => p.activo).length}
                     </span>
                   </div>
@@ -600,17 +611,20 @@ export default function NomencladorPage() {
               </div>
 
               {loading ? (
-                <div className="text-center py-12 text-slate-600">Cargando...</div>
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                  <p className="mt-4 text-gray-400">Cargando procedimientos...</p>
+                </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="rounded-md border border-gray-700 overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Código</TableHead>
-                        <TableHead>Procedimiento</TableHead>
-                        <TableHead>Complejidad</TableHead>
-                        <TableHead>Valor ({mesFiltro}/{anioFiltro})</TableHead>
-                        <TableHead>Activo</TableHead>
+                      <TableRow className="bg-green-500/20 border-b border-green-500/30">
+                        <TableHead className="text-green-400 font-bold">Código</TableHead>
+                        <TableHead className="text-green-400 font-bold">Procedimiento</TableHead>
+                        <TableHead className="text-green-400 font-bold">Complejidad</TableHead>
+                        <TableHead className="text-green-400 font-bold">Valor ({mesFiltro}/{anioFiltro})</TableHead>
+                        <TableHead className="text-green-400 font-bold">Activo</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -620,15 +634,15 @@ export default function NomencladorPage() {
                           const valorItem = valores.find(v => v.complejidad === row.complejidad);
                           
                           return (
-                            <TableRow key={row.id}>
-                              <TableCell className="font-mono">{row.codigo}</TableCell>
-                              <TableCell>
+                            <TableRow key={row.id} className="border-b border-gray-700/50 hover:bg-gray-800/50">
+                              <TableCell className="font-mono text-gray-200">{row.codigo}</TableCell>
+                              <TableCell className="text-gray-200">
                                 <InlineEditCell
                                   value={row.procedimiento}
                                   onSave={(value) => handleUpdateProcedimiento(row, 'procedimiento', value)}
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="text-gray-200">
                                 <InlineEditCell
                                   value={row.complejidad || ''}
                                   onSave={(value) => handleUpdateProcedimiento(row, 'complejidad', value || null)}
@@ -637,11 +651,11 @@ export default function NomencladorPage() {
                               </TableCell>
                               <TableCell>
                                 {valorItem ? (
-                                  <span className="font-semibold text-green-600">
+                                  <span className="font-semibold text-green-400">
                                     {formatARS(valorItem.valor)}
                                   </span>
                                 ) : (
-                                  <span className="text-slate-400 text-sm italic">
+                                  <span className="text-gray-500 text-sm italic">
                                     Sin valor para {mesFiltro}/{anioFiltro}
                                   </span>
                                 )}
@@ -657,7 +671,7 @@ export default function NomencladorPage() {
                         })
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="h-24 text-center">
+                          <TableCell colSpan={5} className="h-24 text-center text-gray-400">
                             No hay procedimientos registrados.
                           </TableCell>
                         </TableRow>
@@ -670,28 +684,29 @@ export default function NomencladorPage() {
 
             <TabsContent value="valores" className="p-6">
               <div className="mb-6 space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                  <p className="text-sm text-blue-900 mb-2">
+                <div className="glass-effect-dark border-blue-500/30 rounded-md p-4 bg-blue-500/10">
+                  <p className="text-sm text-blue-300 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-400" />
                     <strong>💡 ¿Cómo funcionan los valores mensuales?</strong>
                   </p>
-                  <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
-                    <li><strong>Primer mes:</strong> Importe el nomenclador desde Excel (botón en pestaña "Procedimientos")</li>
-                    <li><strong>Meses siguientes:</strong> Use "Copiar desde mes anterior" o "Copiar con aumento %"</li>
-                    <li><strong>Histórico:</strong> Cada mes mantiene sus propios valores para re-liquidaciones</li>
-                    <li><strong>Edición:</strong> Puede editar valores haciendo clic en la celda</li>
+                  <ul className="text-sm text-gray-300 list-disc list-inside space-y-1">
+                    <li><strong className="text-blue-400">Primer mes:</strong> Importe el nomenclador desde Excel (botón en pestaña "Procedimientos")</li>
+                    <li><strong className="text-blue-400">Meses siguientes:</strong> Use "Copiar desde mes anterior" o "Copiar con aumento %"</li>
+                    <li><strong className="text-blue-400">Histórico:</strong> Cada mes mantiene sus propios valores para re-liquidaciones</li>
+                    <li><strong className="text-blue-400">Edición:</strong> Puede editar valores haciendo clic en la celda</li>
                   </ul>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="mes-valor">Mes a gestionar</Label>
+                    <Label htmlFor="mes-valor" className="text-gray-300">Mes a gestionar</Label>
                     <Select value={mesFiltro.toString()} onValueChange={(value) => setMesFiltro(parseInt(value))}>
-                      <SelectTrigger id="mes-valor">
+                      <SelectTrigger id="mes-valor" className="glass-effect-dark border-green-500/30 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="glass-effect-dark border-green-500/30">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-                          <SelectItem key={m} value={m.toString()}>
+                          <SelectItem key={m} value={m.toString()} className="text-white hover:bg-green-500/20">
                             {new Date(2000, m - 1).toLocaleString('es-AR', { month: 'long' })}
                           </SelectItem>
                         ))}
@@ -699,14 +714,14 @@ export default function NomencladorPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="anio-valor">Año</Label>
+                    <Label htmlFor="anio-valor" className="text-gray-300">Año</Label>
                     <Select value={anioFiltro.toString()} onValueChange={(value) => setAnioFiltro(parseInt(value))}>
-                      <SelectTrigger id="anio-valor">
+                      <SelectTrigger id="anio-valor" className="glass-effect-dark border-green-500/30 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="glass-effect-dark border-green-500/30">
                         {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map((year) => (
-                          <SelectItem key={year} value={year.toString()}>
+                          <SelectItem key={year} value={year.toString()} className="text-white hover:bg-green-500/20">
                             {year}
                           </SelectItem>
                         ))}
@@ -716,24 +731,37 @@ export default function NomencladorPage() {
                 </div>
 
                 {valores.length === 0 && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                  <div className="glass-effect-dark border-yellow-500/30 rounded-md p-4 bg-yellow-500/10">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                      <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-yellow-900 mb-2">
+                        <p className="text-sm font-semibold text-yellow-300 mb-2">
                           No hay valores para {new Date(anioFiltro, mesFiltro - 1).toLocaleString('es-AR', { month: 'long' })} {anioFiltro}
                         </p>
-                        <p className="text-sm text-yellow-800 mb-3">
+                        <p className="text-sm text-gray-300 mb-3">
                           Debe crear los valores antes de poder procesar liquidaciones de este período.
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          <Button onClick={handleCopiarDesdeUltimoMes} size="sm" variant="default">
+                          <Button 
+                            onClick={handleCopiarDesdeUltimoMes} 
+                            size="sm" 
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/50 border-0"
+                          >
                             📋 Copiar desde mes anterior
                           </Button>
-                          <Button onClick={handleAplicarAumento} size="sm" variant="default">
+                          <Button 
+                            onClick={handleAplicarAumento} 
+                            size="sm"
+                            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/50 border-0"
+                          >
                             📈 Copiar con aumento %
                           </Button>
-                          <Button onClick={handleCreateValor} size="sm" variant="outline">
+                          <Button 
+                            onClick={handleCreateValor} 
+                            size="sm" 
+                            variant="outline"
+                            className="glass-effect-dark border-green-500/30 text-green-400 hover:bg-green-500/20"
+                          >
                             <Plus className="h-4 w-4 mr-2" />
                             Crear manualmente
                           </Button>
@@ -745,14 +773,29 @@ export default function NomencladorPage() {
 
                 {valores.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={handleCreateValor} variant="outline" size="sm">
+                    <Button 
+                      onClick={handleCreateValor} 
+                      variant="outline" 
+                      size="sm"
+                      className="glass-effect-dark border-green-500/30 text-green-400 hover:bg-green-500/20"
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Crear Complejidad
                     </Button>
-                    <Button onClick={handleCopiarDesdeUltimoMes} variant="outline" size="sm">
+                    <Button 
+                      onClick={handleCopiarDesdeUltimoMes} 
+                      variant="outline" 
+                      size="sm"
+                      className="glass-effect-dark border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                    >
                       📋 Copiar desde mes anterior
                     </Button>
-                    <Button onClick={handleAplicarAumento} variant="outline" size="sm">
+                    <Button 
+                      onClick={handleAplicarAumento} 
+                      variant="outline" 
+                      size="sm"
+                      className="glass-effect-dark border-purple-500/30 text-purple-400 hover:bg-purple-500/20"
+                    >
                       📈 Copiar con aumento %
                     </Button>
                   </div>
@@ -761,28 +804,28 @@ export default function NomencladorPage() {
 
               <div className="space-y-3">
                 {valores.length > 0 && (
-                  <div className="bg-slate-100 px-4 py-2 rounded-md inline-block">
-                    <span className="text-slate-600 text-sm">Complejidades configuradas: </span>
-                    <span className="font-bold text-slate-900">{valores.length}</span>
+                  <div className="glass-effect-dark border-green-500/30 px-4 py-2 rounded-md inline-block glow-green">
+                    <span className="text-gray-400 text-sm">Complejidades configuradas: </span>
+                    <span className="font-bold text-green-300">{valores.length}</span>
                   </div>
                 )}
                 
-                <div className="rounded-md border">
+                <div className="rounded-md border border-gray-700 overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Complejidad</TableHead>
-                        <TableHead>Valor</TableHead>
-                        <TableHead>Mes</TableHead>
-                        <TableHead>Año</TableHead>
+                      <TableRow className="bg-green-500/20 border-b border-green-500/30">
+                        <TableHead className="text-green-400 font-bold">Complejidad</TableHead>
+                        <TableHead className="text-green-400 font-bold">Valor</TableHead>
+                        <TableHead className="text-green-400 font-bold">Mes</TableHead>
+                        <TableHead className="text-green-400 font-bold">Año</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {valores.length > 0 ? (
                         valores.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell className="font-semibold">{row.complejidad}</TableCell>
-                            <TableCell>
+                          <TableRow key={row.id} className="border-b border-gray-700/50 hover:bg-gray-800/50">
+                            <TableCell className="font-semibold text-gray-200">{row.complejidad}</TableCell>
+                            <TableCell className="text-gray-200">
                               <InlineEditCell
                                 value={row.valor.toString()}
                                 onSave={(value) => {
@@ -795,16 +838,16 @@ export default function NomencladorPage() {
                                 formatter={(val) => formatARS(parseFloat(val))}
                               />
                             </TableCell>
-                            <TableCell className="text-sm">{row.mes}</TableCell>
-                            <TableCell className="text-sm">{row.anio}</TableCell>
+                            <TableCell className="text-sm text-gray-300">{row.mes}</TableCell>
+                            <TableCell className="text-sm text-gray-300">{row.anio}</TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4} className="h-24 text-center">
+                          <TableCell colSpan={4} className="h-24 text-center text-gray-400">
                             No hay valores para {mesFiltro}/{anioFiltro}. 
                             <br />
-                            <span className="text-sm text-slate-500">
+                            <span className="text-sm text-gray-500">
                               Use "Copiar desde otro mes" si ya tiene valores de un período anterior.
                             </span>
                           </TableCell>
@@ -834,7 +877,9 @@ export default function NomencladorPage() {
             loadValores();
           }}
         />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }
