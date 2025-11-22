@@ -1,0 +1,11 @@
+{
+  "installDependencies": true,
+  "startCommand": "npm run dev",
+  "buildCommand": "npm run build",
+  "env": {
+    "NODE_ENV": "production",
+    "CI": "false",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
+}
+
