@@ -1,8 +1,8 @@
 # 🏥 Sistema de Liquidaciones Médicas | Grow Labs
 
-## 📋 Descripción
+## 👥 Módulo de Instrumentadores
 
-Sistema profesional de gestión de liquidaciones médicas y nomencladores para **todas las obras sociales**. Plataforma unificada que permite gestionar liquidaciones de instrumentadores de manera eficiente y precisa.
+Sistema profesional **exclusivo** para la gestión de liquidaciones de **instrumentadores médicos** y nomencladores para **todas las obras sociales**. Plataforma unificada que permite gestionar liquidaciones de manera eficiente y precisa.
 
 ## 🏥 Obras Sociales Soportadas
 

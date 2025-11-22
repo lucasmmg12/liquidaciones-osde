@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Code, Bug, Sparkles, FileText, Palette, Calculator, CheckCircle2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar, Code, Bug, Sparkles, FileText, Palette, Calculator, CheckCircle2, ExternalLink, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -57,8 +57,12 @@ export default function ActualizacionesPage() {
               Actualizaciones del Sistema
             </span>
           </h1>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/20 border border-green-500/40 mb-4">
+            <Users className="h-5 w-5 text-green-400" />
+            <span className="text-base text-green-300 font-bold">Módulo de Instrumentadores</span>
+          </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Registro completo de mejoras, correcciones y nuevas funcionalidades del módulo de instrumentadores
+            Registro completo de mejoras, correcciones y nuevas funcionalidades exclusivas para la gestión de instrumentadores médicos
           </p>
           
           {/* Fecha y Stats */}

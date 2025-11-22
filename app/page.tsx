@@ -32,7 +32,11 @@ export default function HomePage() {
                 Sistema de Liquidaciones Médicas
               </span>
             </h1>
-            <p className="text-gray-300 text-xl flex items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 mb-3">
+              <Users className="h-4 w-4 text-green-400" />
+              <span className="text-sm text-green-400 font-semibold">Módulo de Instrumentadores</span>
+            </div>
+            <p className="text-gray-300 text-xl flex items-center justify-center gap-2 mt-3">
               <Sparkles className="h-5 w-5 text-green-400" />
               Todas las Obras Sociales en una sola plataforma
             </p>

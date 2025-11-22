@@ -32,8 +32,11 @@ export default function Footer() {
                 <h3 className="text-xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
                   Liquidaciones Médicas
                 </h3>
-                <p className="text-green-300 text-sm italic flex items-center gap-2">
+                <p className="text-green-300 text-sm font-semibold flex items-center gap-2">
                   <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                  Módulo de Instrumentadores
+                </p>
+                <p className="text-gray-400 text-xs italic mt-1">
                   Todas las obras sociales
                 </p>
               </div>
