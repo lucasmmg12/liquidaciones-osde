@@ -83,8 +83,7 @@ async function loadNomenclador(): Promise<{
 }> {
   const { data, error } = await supabase
     .from('procedimientos')
-    .select('codigo, procedimiento, complejidad')
-    .eq('activo', true);
+    .select('codigo, procedimiento, complejidad');
 
   if (error) {
     console.error('Error loading nomenclador:', error);
@@ -116,8 +115,7 @@ async function loadNomenclador(): Promise<{
 async function loadNomencladorPorDescripcion(): Promise<NomencladorPorDescripcion> {
   const { data, error } = await supabase
     .from('procedimientos')
-    .select('codigo, procedimiento, complejidad')
-    .eq('activo', true);
+    .select('codigo, procedimiento, complejidad');
 
   if (error) {
     console.error('Error loading nomenclador por descripción:', error);

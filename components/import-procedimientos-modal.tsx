@@ -31,16 +31,16 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
   const [error, setError] = useState<string>('');
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<string>('');
-  
+
   // Mes y año para los valores
   const currentDate = new Date();
   const [mes, setMes] = useState<number>(currentDate.getMonth() + 1);
   const [anio, setAnio] = useState<number>(currentDate.getFullYear());
-  
+
   const { toast } = useToast();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    
+
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
@@ -51,12 +51,12 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       const XLSX = await import('xlsx');
       const arrayBuffer = await selectedFile.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      
+
       // Buscar la hoja "nomenclador" (case-insensitive)
-      const sheetName = workbook.SheetNames.find((name: string) => 
+      const sheetName = workbook.SheetNames.find((name: string) =>
         name.toLowerCase().includes('nomenclador')
       ) || workbook.SheetNames[0];
-      
+
       if (!sheetName) {
         setError('No se encontró ninguna hoja en el archivo');
         return;
@@ -72,63 +72,57 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       }
 
       console.log('Primera fila del nomenclador:', jsonData[0]);
-      console.log('Columnas disponibles:', Object.keys(jsonData[0]));
 
-      // Buscar columnas de forma flexible
-      const firstRow = jsonData[0];
-      const codigoKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('codigo') || k.toLowerCase().includes('código')
+      // Limpiar TODAS las claves de la primera fila (remover espacios ocultos)
+      const cleanKeys = Object.keys(jsonData[0]).map(k => ({
+        original: k,
+        clean: k.trim().toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+      }));
+
+      console.log('Columnas limpias detectadas:', cleanKeys.map(k => k.clean));
+
+      // Buscar columnas usando las claves limpias
+      const codigoKeyObj = cleanKeys.find(k => k.clean.includes('codigo'));
+      const procKeyObj = cleanKeys.find(k => k.clean.includes('procedimiento') || k.clean.includes('descripcion'));
+      const complKeyObj = cleanKeys.find(k => k.clean.includes('complejidad'));
+      const valorKeyObj = cleanKeys.find(k =>
+        k.clean.includes('valor') && !k.clean.includes('anterior') && !k.clean.includes('nuevo')
       );
-      
-      if (!codigoKey) {
-        setError('No se encontró una columna "Código" o "Codigo" en la hoja nomenclador');
+
+      if (!codigoKeyObj) {
+        setError('No se encontró una columna "Código" o "Codigo" en la hoja nomenclador. Verifique espacios o acentos en el encabezado.');
         return;
       }
 
-      const procKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('procedimiento') || 
-        k.toLowerCase().includes('descripcion') || 
-        k.toLowerCase().includes('descripción')
-      );
+      const codigoKey = codigoKeyObj.original;
+      const procKey = procKeyObj?.original;
+      const complKey = complKeyObj?.original;
+      const valorKey = valorKeyObj?.original;
 
-      const complKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('complejidad')
-      );
-
-      const valorKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('valor') && !k.toLowerCase().includes('anterior') && !k.toLowerCase().includes('nuevo')
-      );
-
-      console.log('Columnas encontradas:', { codigoKey, procKey, complKey, valorKey });
+      console.log('Mapeo de columnas final:', { codigoKey, procKey, complKey, valorKey });
 
       // Preparar preview
       const previewData: PreviewRow[] = jsonData.slice(0, 10).map((row: any) => {
-        const codigo = codigoKey ? String(row[codigoKey] || '').trim().toUpperCase() : '';
+        const codigo = String(row[codigoKey] || '').trim().toUpperCase();
         const procedimiento = procKey ? String(row[procKey] || '').trim() : '';
-        
-        // Complejidad: aceptar "0" como valor válido (puede venir como número o string)
+
         let complejidad: string | null = null;
         if (complKey && row[complKey] !== undefined && row[complKey] !== null) {
-          // Convertir a string, manejar tanto números como strings
           const complValue = String(row[complKey]).trim();
-          // Si es "0" o cualquier otro valor (no vacío), guardarlo
           if (complValue !== '' && complValue !== 'null' && complValue !== 'undefined') {
             complejidad = complValue;
           }
         }
-        
-        // Valor: convertir a número (puede venir como número, string con formato de moneda, etc.)
+
         let valor: number | null = null;
         if (valorKey && row[valorKey] !== undefined && row[valorKey] !== null) {
-          // Si ya es un número, usarlo directamente
           if (typeof row[valorKey] === 'number') {
             valor = row[valorKey];
           } else {
-            // Si es string, limpiar y convertir
             const valorStr = String(row[valorKey]).trim();
             if (valorStr !== '' && valorStr !== 'null' && valorStr !== 'undefined') {
-              // Remover símbolos de moneda y espacios, reemplazar coma por punto
-              // Manejar formato argentino: "18.687,00" -> 18687.00
               const cleaned = valorStr.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.');
               const valorNum = parseFloat(cleaned);
               if (!isNaN(valorNum) && valorNum >= 0) {
@@ -139,10 +133,10 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
         }
 
         return { codigo, procedimiento, complejidad, valor };
-      }).filter(p => p.codigo); // Solo filas con código
+      }).filter(p => p.codigo);
 
       if (previewData.length === 0) {
-        setError('No se encontraron códigos válidos en la hoja nomenclador');
+        setError('No se encontraron códigos válidos. Asegúrese de que la columna de códigos no esté vacía.');
         return;
       }
 
@@ -163,62 +157,49 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       const XLSX = await import('xlsx');
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      
-      // Buscar la hoja "nomenclador"
-      const sheetName = workbook.SheetNames.find((name: string) => 
+
+      const sheetName = workbook.SheetNames.find((name: string) =>
         name.toLowerCase().includes('nomenclador')
       ) || workbook.SheetNames[0];
-      
+
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
 
-      // Identificar columnas
+      // Identificar columnas de nuevo para el proceso completo (clones de lógica de limpieza)
       const firstRow = jsonData[0];
-      const codigoKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('codigo') || k.toLowerCase().includes('código')
-      )!;
-      
-      const procKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('procedimiento') || 
-        k.toLowerCase().includes('descripcion') || 
-        k.toLowerCase().includes('descripción')
+      const allKeys = Object.keys(firstRow);
+
+      const findKey = (pattern: string) => allKeys.find(k =>
+        k.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(pattern)
       );
 
-      const complKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('complejidad')
-      );
-
-      const valorKey = Object.keys(firstRow).find(k => 
-        k.toLowerCase().includes('valor') && !k.toLowerCase().includes('anterior') && !k.toLowerCase().includes('nuevo')
-      );
+      const codigoKey = findKey('codigo')!;
+      const procKey = findKey('procedimiento') || findKey('descripcion');
+      const complKey = findKey('complejidad');
+      const valorKey = allKeys.find(k => {
+        const cleanK = k.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return cleanK.includes('valor') && !cleanK.includes('anterior') && !cleanK.includes('nuevo');
+      });
 
       const importData = jsonData.map((row: any) => {
         const codigo = String(row[codigoKey] || '').trim().toUpperCase();
         const procedimiento = procKey ? String(row[procKey] || '').trim() : codigo;
-        
-        // Complejidad: aceptar "0" como valor válido (puede venir como número o string)
+
         let complejidad: string | null = null;
         if (complKey && row[complKey] !== undefined && row[complKey] !== null) {
-          // Convertir a string, manejar tanto números como strings
           const complValue = String(row[complKey]).trim();
-          // Si es "0" o cualquier otro valor (no vacío), guardarlo
           if (complValue !== '' && complValue !== 'null' && complValue !== 'undefined') {
             complejidad = complValue;
           }
         }
-        
-        // Valor: convertir a número (puede venir como número, string con formato de moneda, etc.)
+
         let valor: number | null = null;
         if (valorKey && row[valorKey] !== undefined && row[valorKey] !== null) {
-          // Si ya es un número, usarlo directamente
           if (typeof row[valorKey] === 'number') {
             valor = row[valorKey];
           } else {
-            // Si es string, limpiar y convertir
             const valorStr = String(row[valorKey]).trim();
             if (valorStr !== '' && valorStr !== 'null' && valorStr !== 'undefined') {
-              // Remover símbolos de moneda y espacios, reemplazar coma por punto
-              // Manejar formato argentino: "18.687,00" -> 18687.00
               const cleaned = valorStr.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.');
               const valorNum = parseFloat(cleaned);
               if (!isNaN(valorNum) && valorNum >= 0) {
@@ -229,10 +210,10 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
         }
 
         return { codigo, procedimiento, complejidad, valor };
-      }).filter(item => item.codigo); // Solo items con código
+      }).filter(item => item.codigo);
 
       setImportProgress('Preparando datos...');
-      
+
       // Preparar datos para inserción en batch
       const procedimientosToInsert: any[] = [];
       const procedimientosToUpdate: any[] = [];
@@ -243,7 +224,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       const { data: existingProcedimientos, error: loadError } = await supabase
         .from('procedimientos')
         .select('codigo, id');
-      
+
       if (loadError) {
         throw new Error(`Error al cargar procedimientos existentes: ${loadError.message}`);
       }
@@ -255,7 +236,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       // Separar en insertar y actualizar
       for (const item of importData) {
         const codigoNormalizado = item.codigo.toUpperCase().trim();
-        
+
         if (existingCodes.has(codigoNormalizado)) {
           // Actualizar existente
           const existing = existingProcedimientos?.find(
@@ -301,7 +282,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
         for (let i = 0; i < procedimientosToInsert.length; i += batchSize) {
           const batch = procedimientosToInsert.slice(i, i + batchSize);
           setImportProgress(`Insertando procedimientos ${i + 1}-${Math.min(i + batchSize, procedimientosToInsert.length)} de ${procedimientosToInsert.length}...`);
-          
+
           const { error } = await supabase
             .from('procedimientos')
             .insert(batch);
@@ -366,7 +347,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
         for (let i = 0; i < procedimientosToUpdate.length; i++) {
           const item = procedimientosToUpdate[i];
           setImportProgress(`Actualizando procedimiento ${i + 1} de ${procedimientosToUpdate.length}...`);
-          
+
           const { error } = await supabase
             .from('procedimientos')
             .update({
@@ -388,7 +369,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
 
       // Insertar/actualizar valores en batch
       let valoresCount = 0;
-      
+
       setImportProgress('Procesando valores...');
       // Obtener valores existentes para el mes/año seleccionado
       const { data: existingValores, error: valoresLoadError } = await supabase
@@ -398,7 +379,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
         .eq('anio', anio)
         .eq('obra_social', 'OSDE')
         .eq('modulo', 'instrumentadores');
-      
+
       if (valoresLoadError) {
         console.error('Error loading valores existentes:', valoresLoadError);
         // Continuar de todas formas, puede que no existan valores aún
@@ -411,7 +392,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
       const valoresArray = Array.from(valoresMap.entries());
       for (const [complejidad, valor] of valoresArray) {
         const existing = existingValores?.find((v: any) => v.complejidad === complejidad);
-        
+
         if (existing) {
           valoresToUpdate.push({
             id: existing.id,
@@ -464,7 +445,7 @@ export function ImportProcedimientosModal({ open, onClose, onImportComplete }: I
           }
         }
       }
-      
+
       setImportProgress('Finalizando...');
 
       console.log('Resumen de importación:', {

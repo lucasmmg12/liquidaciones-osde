@@ -23,7 +23,7 @@ export function exportDetalleToExcel(detalle: DetalleRow[], filename: string = '
   }));
 
   const ws = XLSX.utils.json_to_sheet(data);
-  
+
   // Ajustar ancho de columnas
   const colWidths = [
     { wch: 12 }, // Fecha
@@ -69,7 +69,7 @@ export function exportResumenToExcel(resumen: ResumenRow[], filename: string = '
   ];
 
   const ws = XLSX.utils.json_to_sheet(data);
-  
+
   // Ajustar ancho de columnas
   ws['!cols'] = [
     { wch: 30 }, // Instrumentador
@@ -133,6 +133,30 @@ export function exportLiquidacionCompleta(
   wsResumen['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 15 }];
   XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
 
+  XLSX.writeFile(wb, filename);
+}
+
+/**
+ * Exporta los códigos faltantes a Excel
+ */
+export function exportFaltantesToExcel(faltantes: any[], filename: string = 'codigos-faltantes.xlsx') {
+  if (faltantes.length === 0) return;
+
+  const data = faltantes.map(f => ({
+    'Código': f.codigo,
+    'Procedimiento': f.procedimiento,
+    'Ocurrencias': f.ocurrencias
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [
+    { wch: 15 }, // Código
+    { wch: 50 }, // Procedimiento
+    { wch: 12 }  // Ocurrencias
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Faltantes');
   XLSX.writeFile(wb, filename);
 }
 
