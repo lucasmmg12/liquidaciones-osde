@@ -76,67 +76,89 @@ function normalizarTexto(texto: string): string {
 
 /**
  * Carga el nomenclador completo (mapeando múltiples formas de llegar al procedimiento)
+ * Implementa carga por lotes para superar el límite de 1000 registros de Supabase.
  */
 async function loadNomenclador(): Promise<{
   porCodigo: NomencladorLookup;
   porCodigoNormalizado: NomencladorLookup;
 }> {
-  const { data, error } = await supabase
+  // 1. Obtener count total
+  const { count, error: countError } = await supabase
     .from('procedimientos')
-    .select('codigo, procedimiento, complejidad');
+    .select('*', { count: 'exact', head: true });
 
-  if (error) {
-    console.error('Error loading nomenclador:', error);
-    throw new Error('Error al cargar el nomenclador');
-  }
+  if (countError) throw new Error(`Error al contar procedimientos: ${countError.message}`);
 
+  const total = count || 0;
+  const batchSize = 1000;
   const porCodigo: NomencladorLookup = {};
   const porCodigoNormalizado: NomencladorLookup = {};
 
-  data?.forEach((item: any) => {
-    const codigoOriginal = String(item.codigo).toUpperCase().trim();
-    const codigoNorm = normalizarCodigo(codigoOriginal);
+  // 2. Cargar en lotes
+  for (let i = 0; i < total; i += batchSize) {
+    const { data, error } = await supabase
+      .from('procedimientos')
+      .select('codigo, procedimiento, complejidad')
+      .range(i, i + batchSize - 1);
 
-    const value = {
-      complejidad: item.complejidad,
-      procedimiento: item.procedimiento
-    };
+    if (error) throw error;
 
-    porCodigo[codigoOriginal] = value;
-    porCodigoNormalizado[codigoNorm] = value;
-  });
+    data?.forEach((item: any) => {
+      const codigoOriginal = String(item.codigo).toUpperCase().trim();
+      const codigoNorm = normalizarCodigo(codigoOriginal);
 
+      const value = {
+        complejidad: item.complejidad,
+        procedimiento: item.procedimiento
+      };
+
+      porCodigo[codigoOriginal] = value;
+      porCodigoNormalizado[codigoNorm] = value;
+    });
+  }
+
+  console.log(`✅ Nomenclador cargado: ${Object.keys(porCodigo).length} códigos únicos.`);
   return { porCodigo, porCodigoNormalizado };
 }
 
 /**
  * Carga el nomenclador indexado por descripción normalizada
+ * Implementa carga por lotes para superar el límite de 1000 registros de Supabase.
  */
 async function loadNomencladorPorDescripcion(): Promise<NomencladorPorDescripcion> {
-  const { data, error } = await supabase
+  // 1. Obtener count total
+  const { count, error: countError } = await supabase
     .from('procedimientos')
-    .select('codigo, procedimiento, complejidad');
+    .select('*', { count: 'exact', head: true });
 
-  if (error) {
-    console.error('Error loading nomenclador por descripción:', error);
-    throw new Error('Error al cargar el nomenclador');
+  if (countError) throw new Error(`Error al contar procedimientos: ${countError.message}`);
+
+  const total = count || 0;
+  const batchSize = 1000;
+  const lookup: NomencladorPorDescripcion = {};
+
+  // 2. Cargar en lotes
+  for (let i = 0; i < total; i += batchSize) {
+    const { data, error } = await supabase
+      .from('procedimientos')
+      .select('codigo, procedimiento, complejidad')
+      .range(i, i + batchSize - 1);
+
+    if (error) throw error;
+
+    data?.forEach((item: any) => {
+      const descripcionNormalizada = normalizarTexto(item.procedimiento);
+      if (descripcionNormalizada) {
+        lookup[descripcionNormalizada] = {
+          codigo: String(item.codigo).toUpperCase().trim(),
+          complejidad: item.complejidad,
+          procedimiento: item.procedimiento
+        };
+      }
+    });
   }
 
-  const lookup: NomencladorPorDescripcion = {};
-  data?.forEach((item: any) => {
-    const descripcionNormalizada = normalizarTexto(item.procedimiento);
-    // Solo indexar si hay una descripción sustancial
-    if (descripcionNormalizada) {
-      lookup[descripcionNormalizada] = {
-        codigo: String(item.codigo).toUpperCase().trim(),
-        complejidad: item.complejidad,
-        procedimiento: item.procedimiento
-      };
-    }
-  });
-
-  console.log(`Nomenclador por descripción cargado: ${Object.keys(lookup).length} procedimientos únicos de huella digital`);
-
+  console.log(`✅ Nomenclador por descripción: ${Object.keys(lookup).length} huellas digitales cargadas.`);
   return lookup;
 }
 
