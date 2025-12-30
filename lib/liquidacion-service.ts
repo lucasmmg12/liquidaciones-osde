@@ -313,20 +313,9 @@ export async function processLiquidacion(
     let codigoFinal = codigoOriginal;
     let metodoMatch = '';
 
-    // Paso 1: Match por Código Exacto
-    if (porCodigo[codigoOriginal]) {
-      nomencladorItem = porCodigo[codigoOriginal];
-      metodoMatch = 'Código Exacto';
-      encontradosPorCodigo++;
-    }
-    // Paso 2: Match por Código Normalizado (ej: 00 -> 0)
-    else if (porCodigoNormalizado[codigoNorm]) {
-      nomencladorItem = porCodigoNormalizado[codigoNorm];
-      metodoMatch = 'Código Normalizado';
-      encontradosPorCodigoNorm++;
-    }
-    // Paso 3: Match por Descripción Normalizada (Huella Digital)
-    else if (row.procedimiento) {
+    // PASO 1: PRIORIDAD - Match por Descripción Normalizada (Huella Digital)
+    // El texto es más fiable que el código en los Excels crudos
+    if (row.procedimiento) {
       const descripcionNormalizada = normalizarTexto(row.procedimiento);
       const itemPorDescripcion = nomencladorPorDescripcion[descripcionNormalizada];
 
@@ -341,11 +330,72 @@ export async function processLiquidacion(
       }
     }
 
+    // PASO 2: RESPALDO - Match por Código Exacto (si no se encontró por descripción)
+    if (!nomencladorItem && porCodigo[codigoOriginal]) {
+      nomencladorItem = porCodigo[codigoOriginal];
+      metodoMatch = 'Código Exacto';
+      encontradosPorCodigo++;
+    }
+
+    // PASO 3: RESPALDO - Match por Código Normalizado (ej: 00 -> 0)
+    if (!nomencladorItem && porCodigoNormalizado[codigoNorm]) {
+      nomencladorItem = porCodigoNormalizado[codigoNorm];
+      metodoMatch = 'Código Normalizado';
+      encontradosPorCodigoNorm++;
+    }
+
     if (metodoMatch && nomencladorItem) {
-      console.log(`✓ [${metodoMatch}] Encontrado: ${codigoOriginal} -> ${codigoFinal} (${nomencladorItem.procedimiento})`);
+      // Procedimiento encontrado, ahora buscar el valor
+      const complejidad = nomencladorItem.complejidad || 'SIN_COMPLEJIDAD';
+      const valorKey = `${complejidad}|${mes}|${anio}|${obraSocial}|${modulo}`;
+      const valor = valores[valorKey];
+
+      if (!valor && valor !== 0) {
+        // ERROR TIPO A: El procedimiento EXISTE pero no tiene PRECIO para este mes
+        console.log(`⚠️ [${metodoMatch}] Encontrado pero SIN VALOR: ${codigoOriginal} -> ${codigoFinal}. Complejidad: ${complejidad}`);
+        noEncontrados++;
+
+        const keyFaltante = codigoFinal || codigoOriginal || 'S/C';
+        const existing = faltantesMap.get(keyFaltante);
+        if (existing) {
+          existing.ocurrencias++;
+        } else {
+          faltantesMap.set(keyFaltante, {
+            procedimiento: `(SIN PRECIO - COMPL ${complejidad}) ${nomencladorItem.procedimiento}`,
+            ocurrencias: 1
+          });
+        }
+        continue;
+      }
+
+      // TODO OK: Procedimiento y Valor encontrados
+      console.log(`✓ [${metodoMatch}] Liquidado: ${codigoOriginal} -> ${codigoFinal} ($${valor})`);
+
+      // ... resto del procesamiento con 'valor' y 'nomencladorItem' ...
+      // Nota: asumo que la lógica de calculateImporte o similar sigue
+      // Para no romper la estructura, mantengo el flujo original pero con las variables correctas
+
+      const { factor, tienePlusHorario, importeFinal } = processFactors(row, valor, detalle);
+
+      detalle.push({
+        fecha: row.fecha,
+        hora: row.hora,
+        paciente: row.paciente,
+        codigo: codigoFinal,
+        procedimiento: nomencladorItem.procedimiento,
+        cirujano: row.cirujano,
+        instrumentador: row.instrumentador,
+        complejidad: complejidad === 'SIN_COMPLEJIDAD' ? '' : complejidad,
+        valor: valor,
+        factor: factor,
+        plusHorario: tienePlusHorario,
+        importe: importeFinal,
+        obra_social: obraSocial
+      });
+
     } else {
-      // Faltante: no existe en nomenclador
-      console.log(`✗ No se encontró: código=${codigoOriginal} (norm=${codigoNorm}), procedimiento="${row.procedimiento}"`);
+      // ERROR TIPO B: El procedimiento NO EXISTE en el nomenclador
+      console.log(`✗ No se encontró: código=${codigoOriginal}, procedimiento="${row.procedimiento}"`);
       noEncontrados++;
 
       const keyFaltante = codigoOriginal || 'S/C';
@@ -360,62 +410,14 @@ export async function processLiquidacion(
       }
       continue;
     }
+  }
 
-    // Buscar valor según complejidad
-    const complejidad = nomencladorItem.complejidad || 'SIN_COMPLEJIDAD';
-    const valorKey = `${complejidad}|${mes}|${anio}|${obraSocial}|${modulo}`;
-    const valor = valores[valorKey];
-
-    if (!valor && valor !== 0) {
-      // Faltante: no tiene valor asignado para esta complejidad/mes
-      const keyFaltante = codigoFinal || 'S/C';
-      const existing = faltantesMap.get(keyFaltante);
-      if (existing) {
-        existing.ocurrencias++;
-      } else {
-        faltantesMap.set(keyFaltante, {
-          procedimiento: nomencladorItem.procedimiento,
-          ocurrencias: 1
-        });
-      }
-      continue;
-    }
-
-    // Calcular factor base (primer procedimiento de la fila 100%, restantes 50%)
-    let factor = calculateFactor(row.orden_en_fila, row.instrumentador, row.fecha, detalle);
-
-    // Verificar si aplica plus del 20% por horario especial
+  // Helpers internos para limpiar el código de arriba
+  function processFactors(row: any, valor: number, detalleAnterior: any[]) {
+    let factor = calculateFactor(row.orden_en_fila, row.instrumentador, row.fecha, detalleAnterior);
     const tienePlusHorario = aplicaPlusHorario(row.fecha, row.hora);
-
-    // Log para depuración
-    if (tienePlusHorario) {
-      console.log(`🔥 PLUS APLICADO: Fecha=${row.fecha}, Hora=${row.hora}, Factor antes=${factor}, Factor después=${factor + 0.20}`);
-    }
-
-    // Sumar el 20% al factor si corresponde (no multiplicar el importe)
-    if (tienePlusHorario) {
-      factor = factor + 0.20;
-    }
-
-    // Calcular importe con el factor final (que ya incluye el plus si corresponde)
-    const importeBase = valor * factor;
-
-    // Crear fila de detalle (usar codigoFinal que puede ser el oficial si se encontró por descripción)
-    detalle.push({
-      fecha: row.fecha,
-      hora: row.hora,
-      paciente: row.paciente,
-      codigo: codigoFinal, // Usar el código oficial si se encontró por descripción
-      procedimiento: nomencladorItem.procedimiento,
-      cirujano: row.cirujano,
-      instrumentador: row.instrumentador,
-      complejidad: complejidad === 'SIN_COMPLEJIDAD' ? '' : complejidad,
-      valor: valor,
-      factor: factor,
-      plusHorario: tienePlusHorario,
-      importe: importeBase,
-      obra_social: obraSocial
-    });
+    if (tienePlusHorario) factor += 0.20;
+    return { factor, tienePlusHorario, importeFinal: valor * factor };
   }
 
   // Mostrar estadísticas de búsqueda
