@@ -22,7 +22,8 @@ async function checkDatabase() {
     'procedimientos',
     'valores_nomenclador',
     'liquidaciones',
-    'faltantes_liquidacion'
+    'faltantes_liquidacion',
+    'instrumentadores'
   ];
 
   console.log('Verificando tablas...\n');

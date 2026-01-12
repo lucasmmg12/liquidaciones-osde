@@ -10,7 +10,7 @@ El proyecto no puede conectarse a la base de datos porque **las tablas no existe
 
 1. Ve a https://supabase.com/dashboard
 2. Inicia sesión con tu cuenta
-3. Selecciona tu proyecto: `arlzwmrkpqjeslxvsmri`
+3. Selecciona tu proyecto: `muhiwkvohidjkbmwbsfu`
 
 ### Paso 2: Abrir el SQL Editor
 
